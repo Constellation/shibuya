@@ -1,0 +1,76 @@
+# Shibuya
+
+## Abstract
+
+Shibuya is ES.next implementation written in ES5.1.
+Currently, this works on Node.js.
+
+## What's Shibuya?
+
+[http://en.wikipedia.org/wiki/Shibuya,\_Tokyo](Shibuya) is a ward of Tokyo.
+And this engine is originated from Japanese JavaScript user group, [http://shibuyajs.org/](Shibuya.js) in this place.
+We love ECMAScript and implementations.
+
+## Getting started
+
+You can simply install Shibuya by
+
+    npm install -g shibuya
+
+and in your console, you can use 'shibuya' command like this,
+
+    shibuya [file]
+
+if file is not provided, Shibuya starts with interactive shell mode.
+
+## Status
+
+Shibuya is tested by test262 ES5 conformance suite, and Shibuya's ES.next conformance suite.
+Currently, Shibuya has already sufficed for ES5 engine.
+
+## Internals
+
+In shibuya, we use esprima harmony branch as a parser, and implement Shibuya as a simple AST Interpreter.
+
+Runtime is also implemented by ES5.1. See source code for more details.
+
+## Goals
+
+Implementing ES.next precisely and being reference implementation of ES.next are goals.
+This is implemented in ES5.1 because of readability of ECMAScript developers.
+So this implementation is not targetting fast speed.
+
+Basically, this project started as a sub-project of [https://github.com/Constellation/iv](iv / lv5) ECMAScript engine project written in C++,
+some code is based on that implementation.
+
+## Developers and Contributors
+
++ Yusuke Suzuki (a.k.a. github id, Constellation)
+
+## License
+
+Copyright (C) 2012 [Yusuke Suzuki](http://github.com/Constellation)
+ (twitter: [@Constellation](http://twitter.com/Constellation)) and other contributors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+[![Build Status](https://secure.travis-ci.org/Constellation/shibuya.png)](http://travis-ci.org/Constellation/shibuya)

@@ -1,0 +1,34 @@
+{
+    "name": "shibuya",
+    "description": "ECMA262 6th draft engine",
+    "homepage": "http://github.com/Constellation/shibuya.html",
+    "main": "shibuya.js",
+    "bin": {
+        "shibuya": "./bin/shibuya.js"
+    },
+    "version": "0.0.4-dev",
+    "engines": {
+        "node": ">=0.4.0"
+    },
+    "maintainers": [{
+        "name": "Yusuke Suzuki",
+        "email": "utatane.tea@gmail.com",
+        "web": "http://github.com/Constellation"
+    }],
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/Constellation/shibuya.git"
+    },
+    "devDependencies": {
+      "mocha": "*",
+      "should": "*",
+      "esprima": "*"
+    },
+    "licenses": [{
+        "type": "BSD",
+        "url": "http://github.com/Constellation/shibuya/raw/master/LICENSE.BSD"
+    }],
+    "scripts": {
+        "test": "node test/run.js"
+    }
+}
