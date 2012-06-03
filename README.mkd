@@ -1,5 +1,7 @@
 # Shibuya
 
+# Currently, not implemented yet.
+
 ## Abstract
 
 Shibuya is ES.next implementation written in ES5.1.
