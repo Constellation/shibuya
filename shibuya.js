@@ -28,7 +28,14 @@
 (function (exports) {
     'use strict';
 
-    var NativeBrand = {
+    var NativeBrand,
+        slice,
+        GetValue,
+        SpecialGet,
+        PutValue,
+        SpecialPut;
+
+    NativeBrand = {
         NativeFunction: 'NativeFunction',
         NativeArray: 'NativeArray',
         StringWrapper: 'StringWrapper',
@@ -1058,15 +1065,12 @@
     }
 
     // 10.3
-    // Realm is also Stack VM
     function Realm(opt) {
         this.intrinsics = null;
         this.this = null;
         this.globalEnv = null;
         this.loader = null;
 
-        // below is internal property of Stack VM
-        this.__stack = [];
         this.__option = opt;
     }
 
@@ -1083,64 +1087,6 @@
         }
     };
 
-    // This is Stack VM main loop
-    // Basic logic is based on iv / lv5 / railgun 0.0.1 Stack VM
-    Realm.prototype.Run = AbstractOperation(function RealmRun(exec) {
-        var instr, pc, code;
-
-        code = exec.code;
-        MAIN: for (;pc < code.instructions.length;) {
-            // fetch opcode phase
-            instr = code.instructions[pc++];
-
-            // execute body phase
-            switch (instr.opcode) {
-                default: {
-                    this.FATAL("unknown opcode", instr);
-                    UNREACHABLE();
-                }
-            }
-
-            // error check phase
-            while (true) {
-                for (i = 0, len = code.handlers.length; i < len; ++i) {
-                    handler = code.handlers[i];
-                    if (handler.begin < pc && pc <= handler.end) {
-                        switch (handler.type) {
-                        case Handler.ENV:
-                            exec.LexicalEnvironment = exec.LexicalEnvironment.outer;
-                            break;
-
-                        default:
-                            err = this.materializeError();
-                            this.__stack.length = handler.unwindStack(this);
-                            if (handler.type === Handler.FINALLY) {
-                                this.__stack.push(JSEmpty);
-                                this.__stack.push(err);
-                                this.__stack.push(Handler.FINALLY);
-                            } else {
-                                this.__stack.push(err);
-                            }
-                            pc = handler.end;
-                            continue MAIN;
-                        }
-                    }
-                }
-                if (!exec.PreviousContext) {
-                    // from native
-                    break;
-                } else {
-                    // unwind
-                    pc = exec.__previous_pc;
-                    this.__stack.length = exec.__previous_sp;
-                    exec = exec.PreviousContext;
-                    code = exec.code;
-                }
-            }
-            throw this.materializeError();
-        }
-    });
-
     // 10.4
     function ExecutionContext(state, PreviousContext, Realm, LexicalEnvironment, VariableEnvironment) {
         this.state = state;
@@ -1151,9 +1097,55 @@
 
         // below is internals
         this.__previous_pc = 0;
-        this.__previous_sp = 0;
         this.__code = null;
+        this.__stack = [];
     }
+
+
+    // This is Stack VM main loop
+    // Basic logic is based on iv / lv5 / railgun 0.0.1 Stack VM
+    ExecutionContext.prototype.Run = AbstractOperation(function ExecutionContextRun() {
+        var instr, pc, code, err;
+
+        code = this.__code;
+        MAIN: for (;pc < code.instructions.length;) {
+            // fetch opcode phase
+            instr = code.instructions[pc++];
+
+            // execute body phase
+            switch (instr.opcode) {
+                default: {
+                    this.Realm.FATAL("unknown opcode", instr);
+                    UNREACHABLE();
+                }
+            }
+
+            // error check phase
+            for (i = 0, len = code.handlers.length; i < len; ++i) {
+                handler = code.handlers[i];
+                if (handler.begin < pc && pc <= handler.end) {
+                    switch (handler.type) {
+                    case Handler.ENV:
+                        this.LexicalEnvironment = this.LexicalEnvironment.outer;
+                        break;
+
+                    default:
+                        this.__stack.length = handler.unwindStack(this);
+                        if (handler.type === Handler.FINALLY) {
+                            this.__stack.push(JSEmpty);
+                            this.__stack.push(err);
+                            this.__stack.push(Handler.FINALLY);
+                        } else {
+                            this.__stack.push(err);
+                        }
+                        pc = handler.end;
+                        continue MAIN;
+                    }
+                }
+            }
+            throw err;
+        }
+    });
 
     // 10.4.2
     function IdentifierResolution(ctx, name, strict) {
