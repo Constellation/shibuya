@@ -11,8 +11,8 @@ Currently, this works on Node.js.
 
 ## What's Shibuya?
 
-[http://en.wikipedia.org/wiki/Shibuya,\_Tokyo](Shibuya) is a ward of Tokyo.
-And this engine is originated from Japanese JavaScript user group, [http://shibuyajs.org/](Shibuya.js) in this place.
+[Shibuya](http://en.wikipedia.org/wiki/Shibuya,\_Tokyo) is a ward of Tokyo.
+And this engine is originated from Japanese JavaScript user group, [Shibuya.js](http://shibuyajs.org/) in this place.
 We love ECMAScript and implementations.
 
 ## Getting started
@@ -44,7 +44,7 @@ Implementing ES.next precisely and being reference implementation of ES.next are
 This is implemented in ES5.1 because of readability of ECMAScript developers.
 So this implementation is not targetting fast speed.
 
-Basically, this project started as a sub-project of [https://github.com/Constellation/iv](iv / lv5) ECMAScript engine project written in C++,
+Basically, this project started as a sub-project of [iv / lv5](https://github.com/Constellation/iv) ECMAScript engine project written in C++,
 some code is based on that implementation.
 
 ## Developers and Contributors
