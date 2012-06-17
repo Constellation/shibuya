@@ -180,7 +180,8 @@
         var base, get;
 
         // 8.9.1-1
-        $ReturnIfAbrupt(V);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(V)) { return V; } else if (V instanceof Completion) { V = V.value; }
 
         // 8.9.1-2
         if (Type(V) === 'Reference') {
@@ -226,7 +227,8 @@
 
         O = ToObject(base);
         // FIXME inserted
-        $ReturnIfAbrupt(O);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(O)) { return O; } else if (O instanceof Completion) { O = O.value; }
         desc = O.GetProperty(P);
         if (desc === undefined) {
             return undefined;
@@ -254,8 +256,10 @@
     var PutValue = AbstractOperation(function (V, W) {
         var base;
 
-        $ReturnIfAbrupt(V);
-        $ReturnIfAbrupt(W);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(V)) { return V; } else if (V instanceof Completion) { V = V.value; }
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(W)) { return W; } else if (W instanceof Completion) { W = W.value; }
 
         if (Type(V) !== 'Reference') {
             throw new ReferenceError('8.9.2-3');
@@ -294,7 +298,8 @@
         O = ToObject(base);
 
         // FIXME(Constellation) inserted
-        $ReturnIfAbrupt(O);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(O)) { return O; } else if (O instanceof Completion) { O = O.value; }
 
         if (base.CanPut(P)) {
         }
@@ -322,7 +327,8 @@
     });
 
     var GetThisValue = AbstractOperation(function (V) {
-        $ReturnIfAbrupt(V);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(V)) { return V; } else if (V instanceof Completion) { V = V.value; }
 
         if (Type(V) !== 'Reference') {
             return V;
@@ -432,7 +438,8 @@
     var ToPropertyDescriptor = AbstractOperation(function (Obj) {
         var desc, enumerable, conf, value, writable, getter, setter;
 
-        $ReturnIfAbrupt(Obj);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(Obj)) { return Obj; } else if (Obj instanceof Completion) { Obj = Obj.value; }
 
         if (Type(Obj) !== 'Object') {
             throw new TypeError('8.10.5-2');
@@ -442,31 +449,36 @@
 
         if (Obj.HasProperty('enumerable')) {
             enumerable = Obj.Get('enumerable');
-            $ReturnIfAbrupt(enumerable);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(enumerable)) { return enumerable; } else if (enumerable instanceof Completion) { enumerable = enumerable.value; }
             desc.Enumerable = ToBoolean(enumerable);
         }
 
         if (Obj.HasProperty('configurable')) {
             conf = Obj.Get('configurable');
-            $ReturnIfAbrupt(conf);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(conf)) { return conf; } else if (conf instanceof Completion) { conf = conf.value; }
             desc.Configurable = ToBoolean(conf);
         }
 
         if (Obj.HasProperty('value')) {
             value = Obj.Get('value');
-            $ReturnIfAbrupt(value);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(value)) { return value; } else if (value instanceof Completion) { value = value.value; }
             desc.Value = value;
         }
 
         if (Obj.HasProperty('writable')) {
             writable = Obj.Get('writable');
-            $ReturnIfAbrupt(writable);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(writable)) { return writable; } else if (writable instanceof Completion) { writable = writable.value; }
             desc.Writable = ToBoolean(writable);
         }
 
         if (Obj.HasProperty('get')) {
             getter = Obj.Get('get');
-            $ReturnIfAbrupt(getter);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(getter)) { return getter; } else if (getter instanceof Completion) { getter = getter.value; }
             if (!IsCallable(getter) && getter !== undefined) {
                 throw new TypeError('8.10.5-8-c');
             }
@@ -475,7 +487,8 @@
 
         if (Obj.HasProperty('set')) {
             setter = Obj.Get('set');
-            $ReturnIfAbrupt(setter);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(setter)) { return setter; } else if (setter instanceof Completion) { setter = setter.value; }
             if (!IsCallable(setter) && setter !== undefined) {
                 throw new TypeError('8.10.5-9-c');
             }
@@ -593,7 +606,8 @@
         var number;
 
         number = ToNumber(argument);
-        $ReturnIfAbrupt(number);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(number)) { return number; } else if (number instanceof Completion) { number = number.value; }
         if (isNaN(number)) {
             return 0;
         }
@@ -609,7 +623,8 @@
     var ToInt32 = AbstractOperation(function (argument) {
         var number;
         number = ToNumber(argument);
-        $ReturnIfAbrupt(number);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(number)) { return number; } else if (number instanceof Completion) { number = number.value; }
         return number >> 0;
     });
 
@@ -617,7 +632,8 @@
     var ToUint32 = AbstractOperation(function (argument) {
         var number;
         number = ToNumber(argument);
-        $ReturnIfAbrupt(number);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(number)) { return number; } else if (number instanceof Completion) { number = number.value; }
         return number >>> 0;
     });
 
@@ -625,7 +641,8 @@
     var ToUint16 = AbstractOperation(function (argument) {
         var number;
         number = ToNumber(argument);
-        $ReturnIfAbrupt(number);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(number)) { return number; } else if (number instanceof Completion) { number = number.value; }
         return (number >>> 0) % (1 << 16);
     });
 
@@ -678,7 +695,8 @@
 
     // 9.1.10
     var ToPropertyKey = AbstractOperation(function (argument) {
-        $ReturnIfAbrupt(argument);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(argument)) { return argument; } else if (argument instanceof Completion) { argument = argument.value; }
         if (Type(argument) === 'Object') {
             if (argument.NativeBrand === NativeBrand.NativePrivateName) {
                 return argument;
@@ -735,8 +753,10 @@
     }
 
     function SameValue(x, y) {
-        $ReturnIfAbrupt(x);
-        $ReturnIfAbrupt(y);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(x)) { return x; } else if (x instanceof Completion) { x = x.value; }
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(y)) { return y; } else if (y instanceof Completion) { y = y.value; }
 
         if (Type(x) !== Type(y)) {
             return false;
@@ -758,8 +778,10 @@
     }
 
     function StrictEqual(x, y) {
-        $ReturnIfAbrupt(x);
-        $ReturnIfAbrupt(y);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(x)) { return x; } else if (x instanceof Completion) { x = x.value; }
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(y)) { return y; } else if (y instanceof Completion) { y = y.value; }
         return x === y;
     }
 
@@ -767,9 +789,11 @@
     var Invoke = AbstractOperation(function (P, O, args) {
         var obj, func;
         obj = ToObject(O);
-        $ReturnIfAbrupt(obj);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(obj)) { return obj; } else if (obj instanceof Completion) { obj = obj.value; }
         func = obj.Get(P);
-        $ReturnIfAbrupt(func);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(func)) { return func; } else if (func instanceof Completion) { func = func.value; }
         if (!IsCallable(func)) {
             throw new TypeError('9.3.1-5');
         }
@@ -1342,38 +1366,46 @@
         var toString, str, valueOf, val;
         if (hint === 'String') {
             toString = this.Get('toString');
-            $ReturnIfAbrupt(toString);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(toString)) { return toString; } else if (toString instanceof Completion) { toString = toString.value; }
             if (IsCallable(toString)) {
                 str = toString.Call(this, []);
-                $ReturnIfAbrupt(str);
+                // expanded ReturnIfAbrupt by preprocess.js
+                if (isAbruptCompletion(str)) { return str; } else if (str instanceof Completion) { str = str.value; }
                 if (IsPrimitiveValue(str)) {
                     return str;
                 }
             }
             valueOf = this.Get('valueOf');
-            $ReturnIfAbrupt(valueOf);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(valueOf)) { return valueOf; } else if (valueOf instanceof Completion) { valueOf = valueOf.value; }
             if (IsCallable(valueOf)) {
                 val = valueOf.Call(this, []);
-                $ReturnIfAbrupt(val);
+                // expanded ReturnIfAbrupt by preprocess.js
+                if (isAbruptCompletion(val)) { return val; } else if (val instanceof Completion) { val = val.value; }
                 if (IsPrimitiveValue(val)) {
                     return val;
                 }
             }
         } else {
             valueOf = this.Get('valueOf');
-            $ReturnIfAbrupt(valueOf);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(valueOf)) { return valueOf; } else if (valueOf instanceof Completion) { valueOf = valueOf.value; }
             if (IsCallable(valueOf)) {
                 val = valueOf.Call(this, []);
-                $ReturnIfAbrupt(val);
+                // expanded ReturnIfAbrupt by preprocess.js
+                if (isAbruptCompletion(val)) { return val; } else if (val instanceof Completion) { val = val.value; }
                 if (IsPrimitiveValue(val)) {
                     return val;
                 }
             }
             toString = this.Get('toString');
-            $ReturnIfAbrupt(toString);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(toString)) { return toString; } else if (toString instanceof Completion) { toString = toString.value; }
             if (IsCallable(toString)) {
                 str = toString.Call(this, []);
-                $ReturnIfAbrupt(str);
+                // expanded ReturnIfAbrupt by preprocess.js
+                if (isAbruptCompletion(str)) { return str; } else if (str instanceof Completion) { str = str.value; }
                 if (IsPrimitiveValue(str)) {
                     return str;
                 }
@@ -1670,7 +1702,8 @@
                 } else if (Type(thisArgument) !== 'Object') {
                     // FIXME fix this typo, thisArg
                     thisValue = ToObject(thisArgument);
-                    $ReturnIfAbrupt(thisValue);
+                    // expanded ReturnIfAbrupt by preprocess.js
+                    if (isAbruptCompletion(thisValue)) { return thisValue; } else if (thisValue instanceof Completion) { thisValue = thisValue.value; }
                 } else {
                     thisValue = thisArgument;
                 }
@@ -1696,7 +1729,8 @@
     var FunctionConstruct = AbstractOperation(function FunctionConstruct(argumentsList) {
         var proto, obj, result;
         protot = this.Get('prototype');
-        $ReturnIfAbrupt(proto);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(proto)) { return proto; } else if (proto instanceof Completion) { proto = proto.value; }
         if (Type(proto) === 'Object') {
             obj = ObjectCreate(proto);
         }
@@ -1705,7 +1739,8 @@
             obj = ObjectCreate(proto);
         }
         result = this.Call(obj, argumentsList);
-        $ReturnIfAbrupt(result);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(result)) { return result; } else if (result instanceof Completion) { result = result.value; }
         if (Type(result) === 'Object') {
             return result;
         }
@@ -1755,10 +1790,12 @@
             newLenDesc = copy(Desc);
             newLen = ToUint32(Desc.Value);
             // FIXME(Constellation) inserted
-            $ReturnIfAbrupt(newLen);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(newLen)) { return newLen; } else if (newLen instanceof Completion) { newLen = newLen.value; }
             val = ToNumber(Desc.Value);
             // FIXME(Constellation) inserted
-            $ReturnIfAbrupt(val);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(val)) { return val; } else if (val instanceof Completion) { val = val.value; }
             if (newLen !== val) {
                 throw RangeError('15.4.5.1-3-d');
             }
@@ -1780,7 +1817,8 @@
             }
             succeeded = JSObject.prototype.DefineOwnProperty.call(this, 'length', newLenDesc, Throw);
             // FIXME(Constellation) inserted
-            $ReturnIfAbrupt(succeeded);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(succeeded)) { return succeeded; } else if (succeeded instanceof Completion) { succeeded = succeeded.value; }
             if (succeeded === false) {
                 return false;
             }
@@ -1805,13 +1843,15 @@
             return true;
         } else if (isArrayIndex(P)) {
             index = ToUint32(P);
-            $ReturnIfAbrupt(index);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(index)) { return index; } else if (index instanceof Completion) { index = index.value; }
             if (index >= oldLen && oldLenDesc.Writable === false) {
                 Reject('15.4.5.1-4-c');
             }
             // FIXME(Constellation) inserted
             succeeded = JSObject.prototype.DefineOwnProperty.call(this, P, Desc, false);
-            $ReturnIfAbrupt(succeeded);
+            // expanded ReturnIfAbrupt by preprocess.js
+            if (isAbruptCompletion(succeeded)) { return succeeded; } else if (succeeded instanceof Completion) { succeeded = succeeded.value; }
             if (succeeded === false) {
                 Reject('15.4.5.1-4-e');
             }
@@ -1858,18 +1898,21 @@
         }
         val = ToInteger(P);
         // FIXME inserted
-        $ReturnIfAbrupt(val);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(val)) { return val; } else if (val instanceof Completion) { val = val.value; }
         val = Math.abs(val);
         val = ToString(val);
         // FIXME inserted
-        $ReturnIfAbrupt(val);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(val)) { return val; } else if (val instanceof Completion) { val = val.value; }
         if (val !== P) {
             return undefined;
         }
         str = this.PrimitiveValue;
         index = ToInteger(P);
         // FIXME inserted
-        $ReturnIfAbrupt(index);
+        // expanded ReturnIfAbrupt by preprocess.js
+        if (isAbruptCompletion(index)) { return index; } else if (index instanceof Completion) { index = index.value; }
         len = str.length;
         if (len <= index) {
             return undefined;
