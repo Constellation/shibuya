@@ -23,7 +23,7 @@
 */
 
 /*jslint bitwise:true */
-/*global shibuya:true, exports:true*/
+/*global shibuya:true, exports:true, $ReturnIfAbrupt:true*/
 
 (function (exports) {
     'use strict';
@@ -47,11 +47,22 @@
         return [];
     }
 
-    function Internalize(str) {
-        return '[[' + str + ']]';
+    function copy(obj) {
+        return Object.keys(obj).reduce(function (result, key) {
+            result[key] = obj[key];
+        }, {});
     }
 
     var slice = Array.prototype.slice;
+
+    // Fatal error
+
+    function FatalError(args) {
+        this.args = args;
+        Error.call(this, args[0]);
+    }
+
+    FatalError.prototype = Object.create(Error.prototype);
 
     function Completion(type, value, target) {
         this.type = type;
@@ -90,6 +101,9 @@
                 }
                 return NormalCompletion(ret);
             } catch (e) {
+                if (e instanceof FatalError) {
+                    throw e;
+                }
                 return ThrowCompletion(e);
             }
         }
@@ -143,7 +157,7 @@
     }
 
     function IsPropertyReference(V) {
-        return V.base instanceof JSObject || HasPrimitiveBase(V)
+        return V.base instanceof JSObject || HasPrimitiveBase(V);
     }
 
     function IsUnresolvableReference(V) {
@@ -159,8 +173,7 @@
         var base, get;
 
         // 8.9.1-1
-        // ReturnIfAbrupt
-        if (isAbruptCompletion(V)) { return V; } else if (V instanceof Completion) { V = V.value; }
+        $ReturnIfAbrupt(V);
 
         // 8.9.1-2
         if (Type(V) === 'Reference') {
@@ -205,6 +218,8 @@
         base = this.valueOf();
 
         O = ToObject(base);
+        // FIXME inserted
+        $ReturnIfAbrupt(O);
         desc = O.GetProperty(P);
         if (desc === undefined) {
             return undefined;
@@ -232,11 +247,8 @@
     var PutValue = AbstractOperation(function (V, W) {
         var base;
 
-        // ReturnIfAbrupt
-        if (isAbruptCompletion(V)) { return V; } else if (V instanceof Completion) { V = V.value; }
-
-        // ReturnIfAbrupt
-        if (isAbruptCompletion(W)) { return W; } else if (W instanceof Completion) { W = W.value; }
+        $ReturnIfAbrupt(V);
+        $ReturnIfAbrupt(W);
 
         if (Type(V) !== 'Reference') {
             throw new ReferenceError('8.9.2-3');
@@ -275,8 +287,7 @@
         O = ToObject(base);
 
         // FIXME(Constellation) inserted
-        // ReturnIfAbrupt
-        if (isAbruptCompletion(O)) { return O; } else if (O instanceof Completion) { O = O.value; }
+        $ReturnIfAbrupt(O);
 
         if (base.CanPut(P)) {
         }
@@ -304,8 +315,7 @@
     });
 
     var GetThisValue = AbstractOperation(function (V) {
-        // ReturnIfAbrupt
-        if (isAbruptCompletion(V)) { return V; } else if (V instanceof Completion) { V = V.value; }
+        $ReturnIfAbrupt(V);
 
         if (Type(V) !== 'Reference') {
             return V;
@@ -415,7 +425,7 @@
     var ToPropertyDescriptor = AbstractOperation(function (Obj) {
         var desc, enumerable, conf, value, writable, getter, setter;
 
-        ReturnIfAbrupt(Obj);
+        $ReturnIfAbrupt(Obj);
 
         if (Type(Obj) !== 'Object') {
             throw new TypeError('8.10.5-2');
@@ -425,31 +435,31 @@
 
         if (Obj.HasProperty('enumerable')) {
             enumerable = Obj.Get('enumerable');
-            ReturnIfAbrupt(enumerable);
+            $ReturnIfAbrupt(enumerable);
             desc.Enumerable = ToBoolean(enumerable);
         }
 
         if (Obj.HasProperty('configurable')) {
             conf = Obj.Get('configurable');
-            ReturnIfAbrupt(conf);
+            $ReturnIfAbrupt(conf);
             desc.Configurable = ToBoolean(conf);
         }
 
         if (Obj.HasProperty('value')) {
             value = Obj.Get('value');
-            ReturnIfAbrupt(value);
+            $ReturnIfAbrupt(value);
             desc.Value = value;
         }
 
         if (Obj.HasProperty('writable')) {
             writable = Obj.Get('writable');
-            ReturnIfAbrupt(writable);
+            $ReturnIfAbrupt(writable);
             desc.Writable = ToBoolean(writable);
         }
 
         if (Obj.HasProperty('get')) {
             getter = Obj.Get('get');
-            ReturnIfAbrupt(getter);
+            $ReturnIfAbrupt(getter);
             if (!IsCallable(getter) && getter !== undefined) {
                 throw new TypeError('8.10.5-8-c');
             }
@@ -458,7 +468,7 @@
 
         if (Obj.HasProperty('set')) {
             setter = Obj.Get('set');
-            ReturnIfAbrupt(setter);
+            $ReturnIfAbrupt(setter);
             if (!IsCallable(setter) && setter !== undefined) {
                 throw new TypeError('8.10.5-9-c');
             }
@@ -576,7 +586,7 @@
         var number;
 
         number = ToNumber(argument);
-        ReturnIfAbrupt(number);
+        $ReturnIfAbrupt(number);
         if (isNaN(number)) {
             return 0;
         }
@@ -592,7 +602,7 @@
     var ToInt32 = AbstractOperation(function (argument) {
         var number;
         number = ToNumber(argument);
-        ReturnIfAbrupt(number);
+        $ReturnIfAbrupt(number);
         return number >> 0;
     });
 
@@ -600,7 +610,7 @@
     var ToUint32 = AbstractOperation(function (argument) {
         var number;
         number = ToNumber(argument);
-        ReturnIfAbrupt(number);
+        $ReturnIfAbrupt(number);
         return number >>> 0;
     });
 
@@ -608,7 +618,7 @@
     var ToUint16 = AbstractOperation(function (argument) {
         var number;
         number = ToNumber(argument);
-        ReturnIfAbrupt(number);
+        $ReturnIfAbrupt(number);
         return (number >>> 0) % (1 << 16);
     });
 
@@ -661,7 +671,7 @@
 
     // 9.1.10
     var ToPropertyKey = AbstractOperation(function (argument) {
-        ReturnIfAbrupt(argument);
+        $ReturnIfAbrupt(argument);
         if (Type(argument) === 'Object') {
             if (argument.NativeBrand === NativeBrand.NativePrivateName) {
                 return argument;
@@ -689,6 +699,16 @@
         return argument;
     });
 
+    // 15.4
+    function isArrayIndex(P) {
+        assert(typeof P === 'string');
+        var num = Number(P) >>> 0;
+        if (String(num) === P && num !== 0xFFFFFFFF) {
+            return true;
+        }
+        return false;
+    }
+
     // no error
     function IsCallable(argument) {
         var type, primValue;
@@ -708,8 +728,8 @@
     }
 
     function SameValue(x, y) {
-        ReturnIfAbrupt(x);
-        ReturnIfAbrupt(y);
+        $ReturnIfAbrupt(x);
+        $ReturnIfAbrupt(y);
 
         if (Type(x) !== Type(y)) {
             return false;
@@ -730,13 +750,19 @@
         return x === y;
     }
 
+    function StrictEqual(x, y) {
+        $ReturnIfAbrupt(x);
+        $ReturnIfAbrupt(y);
+        return x === y;
+    }
+
     // 9.3.1
     var Invoke = AbstractOperation(function (P, O, args) {
         var obj, func;
         obj = ToObject(O);
-        ReturnIfAbrupt(obj);
+        $ReturnIfAbrupt(obj);
         func = obj.Get(P);
-        ReturnIfAbrupt(func);
+        $ReturnIfAbrupt(func);
         if (!IsCallable(func)) {
             throw new TypeError('9.3.1-5');
         }
@@ -745,13 +771,13 @@
 
 
     function DeclarativeEnvironmentRecords() {
-        this.__Record = {};
+        this.__record = {};
     }
 
     // no error
     // 10.2.1.1.1
     DeclarativeEnvironmentRecords.prototype.HasBinding = function (N) {
-        if (this.__Record.hasOwnProperty(N)) {
+        if (this.__record.hasOwnProperty(N)) {
             return true;
         }
         return false;
@@ -759,8 +785,8 @@
 
     // 10.2.1.1.2
     DeclarativeEnvironmentRecords.prototype.CreateMutableBinding = AbstractOperation(function (N, D) {
-        assert(!this.__Record.hasOwnProperty(N));
-        this.__Record[N] = {
+        assert(!this.__record.hasOwnProperty(N));
+        this.__record[N] = {
             initialised: false,
             mutable: D
         };
@@ -769,10 +795,10 @@
     // 10.2.1.1.3
     DeclarativeEnvironmentRecords.prototype.SetMutableBinding = AbstractOperation(function (N, V, S) {
         var binding;
-        assert(this.__Record.hasOwnProperty(N));
-        assert(this.__Record[N].initialised);
+        assert(this.__record.hasOwnProperty(N));
+        assert(this.__record[N].initialised);
 
-        binding = this.__Record[N];
+        binding = this.__record[N];
         if (binding.mutable) {
             binding.value = V;
         } else if (!binding.initialised) {  // FIXME this is draft bug
@@ -788,9 +814,9 @@
     // 10.2.1.1.4
     DeclarativeEnvironmentRecords.prototype.GetBindingValue = function (N, S) {
         var binding;
-        assert(this.__Record.hasOwnProperty(N));
+        assert(this.__record.hasOwnProperty(N));
 
-        binding = this.__Record[N];
+        binding = this.__record[N];
         if (!binding.initialised) {
             if (!S) {
                 return undefined;
@@ -805,14 +831,14 @@
     // 10.2.1.1.5
     DeclarativeEnvironmentRecords.prototype.DeleteBinding  = function (N) {
         var binding;
-        if (!this.__Record.hasOwnProperty(N)) {
+        if (!this.__record.hasOwnProperty(N)) {
             return true;
         }
-        binding = this.__Record[N];
+        binding = this.__record[N];
         if (!binding.mutable) {
             return false;
         }
-        delete this.__Record[N];
+        delete this.__record[N];
         return true;
     };
 
@@ -843,8 +869,8 @@
     // no error
     // 10.2.1.1.10
     DeclarativeEnvironmentRecords.prototype.CreateImmutableBinding = function (N) {
-        assert(!this.__Record.hasOwnProperty(N));
-        this.__Record[N] = {
+        assert(!this.__record.hasOwnProperty(N));
+        this.__record[N] = {
             initialised: false,
             mutable: false
         };
@@ -854,9 +880,9 @@
     // 10.2.1.1.11
     DeclarativeEnvironmentRecords.prototype.InitializeBinding = function (N, V) {
         var binding;
-        assert(this.__Record.hasOwnProperty(N));
-        assert(!this.__Record[N].initialised);
-        binding = this.__Record[N];
+        assert(this.__record.hasOwnProperty(N));
+        assert(!this.__record[N].initialised);
+        binding = this.__record[N];
         binding.value = V;
         binding.initialised = true;
     };
@@ -1031,14 +1057,89 @@
         return env;
     }
 
-    // TODO
     // 10.3
-    function Realm(debug) {
+    // Realm is also Stack VM
+    function Realm(opt) {
         this.intrinsics = null;
         this.this = null;
         this.globalEnv = null;
         this.loader = null;
+
+        // below is internal property of Stack VM
+        this.__stack = [];
+        this.__option = opt;
     }
+
+    Realm.prototype.FATAL = function () {
+        if (this.__opt.debug) {
+            this.__opt.debug.apply(this, arguments);
+        }
+        throw new FatalError(arguments);
+    };
+
+    Realm.prototype.DEBUG = function () {
+        if (this.__opt.debug) {
+            this.__opt.debug.apply(this, arguments);
+        }
+    };
+
+    // This is Stack VM main loop
+    // Basic logic is based on iv / lv5 / railgun 0.0.1 Stack VM
+    Realm.prototype.Run = AbstractOperation(function RealmRun(exec) {
+        var instr, pc, code;
+
+        code = exec.code;
+        MAIN: for (;pc < code.instructions.length;) {
+            // fetch opcode phase
+            instr = code.instructions[pc++];
+
+            // execute body phase
+            switch (instr.opcode) {
+                default: {
+                    this.FATAL("unknown opcode", instr);
+                    UNREACHABLE();
+                }
+            }
+
+            // error check phase
+            while (true) {
+                for (i = 0, len = code.handlers.length; i < len; ++i) {
+                    handler = code.handlers[i];
+                    if (handler.begin < pc && pc <= handler.end) {
+                        switch (handler.type) {
+                        case Handler.ENV:
+                            exec.LexicalEnvironment = exec.LexicalEnvironment.outer;
+                            break;
+
+                        default:
+                            err = this.materializeError();
+                            this.__stack.length = handler.unwindStack(this);
+                            if (handler.type === Handler.FINALLY) {
+                                this.__stack.push(JSEmpty);
+                                this.__stack.push(err);
+                                this.__stack.push(Handler.FINALLY);
+                            } else {
+                                this.__stack.push(err);
+                            }
+                            pc = handler.end;
+                            continue MAIN;
+                        }
+                    }
+                }
+                if (!exec.PreviousContext) {
+                    // from native
+                    break;
+                } else {
+                    // unwind
+                    pc = exec.__previous_pc;
+                    this.__stack.length = exec.__previous_sp;
+                    exec = exec.PreviousContext;
+                    code = exec.code;
+                }
+            }
+            throw this.materializeError();
+        }
+    });
 
     // 10.4
     function ExecutionContext(state, PreviousContext, Realm, LexicalEnvironment, VariableEnvironment) {
@@ -1047,8 +1148,12 @@
         this.Realm = Realm;
         this.LexicalEnvironment = LexicalEnvironment;
         this.VariableEnvironment = VariableEnvironment;
-    }
 
+        // below is internals
+        this.__previous_pc = 0;
+        this.__previous_sp = 0;
+        this.__code = null;
+    }
 
     // 10.4.2
     function IdentifierResolution(ctx, name, strict) {
@@ -1079,7 +1184,7 @@
     function JSObject() {
         this.Prototype = null;
         this.Extensible = true;
-        this.__Record = {};
+        this.__record = {};
     }
 
     // 8.12.2
@@ -1108,11 +1213,11 @@
     // 8.12.1
     JSObject.prototype.GetOwnProperty = function GetOwnProperty(P) {
         var D, X;
-        if (!this.__Record.hasOwnProperty(P)) {
+        if (!this.__record.hasOwnProperty(P)) {
             return undefined;
         }
         D = {};
-        X = this.__Record[P];
+        X = this.__record[P];
         if (IsDataDescriptor(X)) {
             D.Value = X.Value;
             D.Writable = X.Writable;
@@ -1231,7 +1336,7 @@
             return true;
         }
         if (desc.Configurable === true) {
-            delete this.__Record[P];
+            delete this.__record[P];
             return true;
         } else {
             if (Throw) {
@@ -1245,38 +1350,38 @@
         var toString, str, valueOf, val;
         if (hint === 'String') {
             toString = this.Get('toString');
-            ReturnIfAbrupt(toString);
+            $ReturnIfAbrupt(toString);
             if (IsCallable(toString)) {
                 str = toString.Call(this, []);
-                ReturnIfAbrupt(str);
+                $ReturnIfAbrupt(str);
                 if (IsPrimitiveValue(str)) {
                     return str;
                 }
             }
             valueOf = this.Get('valueOf');
-            ReturnIfAbrupt(valueOf);
+            $ReturnIfAbrupt(valueOf);
             if (IsCallable(valueOf)) {
                 val = valueOf.Call(this, []);
-                ReturnIfAbrupt(val);
+                $ReturnIfAbrupt(val);
                 if (IsPrimitiveValue(val)) {
                     return val;
                 }
             }
         } else {
             valueOf = this.Get('valueOf');
-            ReturnIfAbrupt(valueOf);
+            $ReturnIfAbrupt(valueOf);
             if (IsCallable(valueOf)) {
                 val = valueOf.Call(this, []);
-                ReturnIfAbrupt(val);
+                $ReturnIfAbrupt(val);
                 if (IsPrimitiveValue(val)) {
                     return val;
                 }
             }
             toString = this.Get('toString');
-            ReturnIfAbrupt(toString);
+            $ReturnIfAbrupt(toString);
             if (IsCallable(toString)) {
                 str = toString.Call(this, []);
-                ReturnIfAbrupt(str);
+                $ReturnIfAbrupt(str);
                 if (IsPrimitiveValue(str)) {
                     return str;
                 }
@@ -1346,9 +1451,9 @@
         }
         if (current === undefined && extensible) {
             if (IsGenericDescriptor(Desc) || IsDataDescriptor(Desc)) {
-                this.__Record[P] = DefaultDataDescriptor(Desc);
+                this.__record[P] = DefaultDataDescriptor(Desc);
             } else {
-                this.__Record[P] = DefaultAccessorDescriptor(Desc);
+                this.__record[P] = DefaultAccessorDescriptor(Desc);
             }
             return true;
         }
@@ -1385,12 +1490,12 @@
                 return Reject('8.12.9-9-a');
             }
             if (IsDataDescriptor(current)) {
-                this.__Record[P] = DefaultAccessorDescriptor({
+                this.__record[P] = DefaultAccessorDescriptor({
                     Configurable: current.Configurable,
                     Enumerable: current.Enumerable
                 });
             } else {
-                this.__Record[P] = DefaultDataDescriptor({
+                this.__record[P] = DefaultDataDescriptor({
                     Configurable: current.Configurable,
                     Enumerable: current.Enumerable
                 });
@@ -1418,7 +1523,7 @@
         }
 
         Object.getOwnPropertyNames(Desc).forEach(function (name) {
-            this.__Record[P][name] = Desc[name];
+            this.__record[P][name] = Desc[name];
         }, this);
 
         return true;
@@ -1435,7 +1540,7 @@
         } else {
             propList = proto.Enumerable(true, onlyEnumerable);
         }
-        Object.getOwnPropertyNames(this.__Record).forEach(function (name) {
+        Object.getOwnPropertyNames(this.__record).forEach(function (name) {
             var desc, index;
             desc = this.GetOwnProperty(name);
             index = propList.indexOf(name);
@@ -1457,16 +1562,388 @@
         return itr;
     });
 
-    function JSArray() {
+    function JSFunction() {
+        this.super.call(this);
     }
 
-    JSArray.prototype = Object.create(JSObject.prototype);
+    // 13.6
+    // functionPrototype, homeObject and methodName are optional
+    function FunctionCreate(kind, FormalParameterList, FunctionBody, Scope, Strict, functionPrototype, homeObject, methodName) {
+        var F, len, thrower;
 
-    JSArray.prototype.DefineOwnProperty = AbstractOperation(function DefineOwnProperty() {
+        F = new JSFunction();
+        F.NativeBrand = NativeBrand.NativeFunction;
+        if (functionPrototype !== undefined) {
+            functionPrototype = FunctionPrototype;  // FIXME fix global Prototype
+        }
+        F.Prototype = functionPrototype;
+        F.Scope = Scope;
+        F.FormalParameters = FormalParameterList;
+        F.Code = FunctionBody;
+        F.Extensible = true;
+        F.Realm = Realm;  // FIXME fix global realm
+        if (homeObject !== undefined) {
+            F.Home = homeObject;
+        }
+        if (methodName !== undefined) {
+            F.MethodName = methodName;
+        }
+
+        // FIXME probably this is bug of spec
+        if (kind === 'Arrow') {
+            F.ThisMode = 'lexical';
+        } else if (Strict) {
+            F.ThisMode = 'strict';
+        } else {
+            F.ThisMode = 'global';
+        }
+
+        len = ExpectedArgumentCount(FormalParameterList);
+        F.DefineOwnProperty('length', {
+            Value: len,
+            Writable: false,
+            Enumerable: false,
+            Configurable: false
+        }, false);
+        if (kind === 'Normal' && Strict) {
+            thrower = ThrowTypeError;  // FIXME fix global ThrowTypeError
+            F.DefineOwnProperty('caller', {
+                Get: thrower,
+                Set: thrower,
+                Enumerable: false,
+                Configurable: false,
+            }, false);
+            F.DefineOwnProperty('arguments', {
+                Get: thrower,
+                Set: thrower,
+                Enumerable: false,
+                Configurable: false,
+            }, false);
+        }
+        F.Strict = Strict;
+        return F;
+    }
+
+    // 13.5
+    // writablePrototype and prototype are optional
+    function MakeConstructor(F, writablePrototype, prototype) {
+        var installNeeded;
+        installNeeded = false;
+        if (prototype === undefined) {
+            installNeeded = true;
+            prototype = ObjectCreate();
+        }
+        if (writablePrototype === undefined) {
+            writablePrototype = true;
+        }
+        F.Construct = FunctionConstruct;
+        F.HasInstance = FunctionHasInstance;
+        if (installNeeded) {
+            F.DefineOwnProperty('constructor', {
+                Value: F,
+                Writable: writablePrototype,
+                Enumerable: false,
+                Configurable: writablePrototype
+            }, false);
+        }
+        F.DefineOwnProperty('prototype', {
+            Value: prototype,
+            Writable: writablePrototype,
+            Enumerable: false,
+            Configurable: writablePrototype
+        }, false);
+        return;
+    }
+
+    JSFunction.prototype = Object.create(JSObject.prototype, {
+        super: JSObject
     });
 
+    JSFunction.prototype.Call = AbstractOperation(function Call(thisArgument, argumentsList) {
+        var callerContext, calleeContext, thisMode, localEnv, thisValue, status, result;
+        callerContext = Exec;  // FIXME fix this global exec
+        callerContext.Suspend();  // FIXME suspend?
+        calleeContext = new ExecutionContext();
+        calleeContext.PreviousContext = callerContext;
+        calleeContext.Realm = this.Realm;
+        thisMode = this.ThisMode;
+        if (thisMode === 'lexical') {
+            localEnv = NewDeclarativeEnvironment(this.Scope);
+        } else {
+            if (thisMode === 'strict') {
+                thisValue = thisArgument;
+            } else {
+                if (thisArgument === null || thisArgument === undefined) {
+                    thisValue = GlobalObject;  // FIXME fix this global obj
+                } else if (Type(thisArgument) !== 'Object') {
+                    // FIXME fix this typo, thisArg
+                    thisValue = ToObject(thisArgument);
+                    $ReturnIfAbrupt(thisValue);
+                } else {
+                    thisValue = thisArgument;
+                }
+            }
+            localEnv = NewMethodEnvironment(this, thisValue);
+        }
+        calleeContext.LexicalEnvironment = localEnv;
+        calleeContext.VariableEnvironment = localEnv;
+        // FIXME argumentsList is missing!!!
+        status = FunctionDeclarationBindingInstantiation(this, argumentsList, localEnv);
+        if (isAbruptCompletion(status)) {
+            callerContext.Restore();
+            return status;
+        }
+        result = EvaluateCode(this.Code);
+        callerContext.Restore();
+        if (result.type === Completion.Type.return) {
+            return NormalCompletion(result.Value);
+        }
+        return result;
+    });
 
-    exports.JSObject = JSObject;
+    var FunctionConstruct = AbstractOperation(function FunctionConstruct(argumentsList) {
+        var proto, obj, result;
+        protot = this.Get('prototype');
+        $ReturnIfAbrupt(proto);
+        if (Type(proto) === 'Object') {
+            obj = ObjectCreate(proto);
+        }
+        // FIXME spec, why this is else?
+        if (Type(proto) !== 'Object') {
+            obj = ObjectCreate(proto);
+        }
+        result = this.Call(obj, argumentsList);
+        $ReturnIfAbrupt(result);
+        if (Type(result) === 'Object') {
+            return result;
+        }
+        return NormalCompletion(obj);
+    });
+
+    function JSArray() {
+        this.super.call(this);
+    }
+
+    function ArrayCreate(length) {
+        var A = new JSArray();
+        A.Prototype = ArrayPrototype;  // TODO(Constellation) fix global ArrayPrototype
+        A.NativeBrand = NativeBrand.NativeArray;
+        A.Extensible = true;
+        // FIXME later see it, this maybe spec bug
+        A.DefineOwnProperty('length', {
+            Value: length,
+            Writable: true,
+            Enumerable: false,
+            Configurable: false
+        }, false);
+        return A;
+    }
+
+    JSArray.prototype = Object.create(JSObject.prototype, {
+        super: JSObject
+    });
+
+    // 15.4.5.3
+    JSArray.prototype.DefineOwnProperty = AbstractOperation(function DefineOwnProperty(P, Desc, Throw) {
+        var oldLenDesc, oldLen, newLenDesc, newLen, val, newWritable, succeeded, deleteSucceeded, index;
+        function Reject(str) {
+            if (Throw) {
+                throw new TypeError(str);
+            }
+            return false;
+        }
+
+        oldLenDesc = this.GetOwnProperty(P);
+        assert(oldLenDesc !== undefined);
+        oldLen = oldLenDesc.Value;
+        if (P === 'length') {
+            if (!Desc.hasOwnProperty('Value')) {
+                return JSObject.prototype.DefineOwnProperty.call(this, 'length', Desc, Throw);
+            }
+            newLenDesc = copy(Desc);
+            newLen = ToUint32(Desc.Value);
+            // FIXME(Constellation) inserted
+            $ReturnIfAbrupt(newLen);
+            val = ToNumber(Desc.Value);
+            // FIXME(Constellation) inserted
+            $ReturnIfAbrupt(val);
+            if (newLen !== val) {
+                throw RangeError('15.4.5.1-3-d');
+            }
+            newLenDesc.Value = newLen;
+            if (newLen >= oldLen) {
+                return JSObject.prototype.DefineOwnProperty.call(this, 'length', newLenDesc, Throw);
+            }
+            if (oldLenDesc.Writable === false) {
+                Reject('15.4.5.1-3-g');
+            }
+            if (!newLenDesc.hasOwnProperty('Writable') || newLenDesc.Writable) {
+                newWritable = true;
+            } else {
+                // 15.4.5.1-3-i-i
+                // need to defer setting the [[Writable]] attribute to false in
+                // case any elements cannot be deleted.
+                newWritable = false;
+                newLenDesc.Writable = true;
+            }
+            succeeded = JSObject.prototype.DefineOwnProperty.call(this, 'length', newLenDesc, Throw);
+            // FIXME(Constellation) inserted
+            $ReturnIfAbrupt(succeeded);
+            if (succeeded === false) {
+                return false;
+            }
+            while (newLen < oldLen) {
+                oldLen = oldLen - 1;
+                deleteSucceeded = this.Delete(String(oldLen), false);
+                ReturnIfAbrupt(deleteSucceeded);
+                if (!deleteSucceeded) {
+                    newLenDesc.Value = oldLen + 1;
+                    if (!newWritable) {
+                        newLenDesc.Writable = false;
+                    }
+                    JSObject.prototype.DefineOwnProperty.call(this, 'length', newLenDesc, false);
+                    Reject('15.4.5.1-3-l-iii-4');
+                }
+            }
+            if (!newWritable) {
+                JSObject.prototype.DefineOwnProperty.call(this, 'length', {
+                    Writable: false
+                }, false);
+            }
+            return true;
+        } else if (isArrayIndex(P)) {
+            index = ToUint32(P);
+            $ReturnIfAbrupt(index);
+            if (index >= oldLen && oldLenDesc.Writable === false) {
+                Reject('15.4.5.1-4-c');
+            }
+            // FIXME(Constellation) inserted
+            succeeded = JSObject.prototype.DefineOwnProperty.call(this, P, Desc, false);
+            $ReturnIfAbrupt(succeeded);
+            if (succeeded === false) {
+                Reject('15.4.5.1-4-e');
+            }
+            if (index >= oldLen) {
+                oldLenDesc.Value = index + 1;
+                JSObject.prototype.DefineOwnProperty.call(this, 'length', oldLenDesc, false);
+            }
+            return true;
+        } else {
+            return JSObject.prototype.DefineOwnProperty.call(this, P, Desc, P);
+        }
+    });
+
+    function JSString() {
+        this.super.call(this);
+    }
+
+    // FIXME StringCreate is needed
+    function StringCreate(str) {
+        var S = new JSString();
+        S.Prototype = StringPrototype;  // TODO(Constellation) fix global StringPrototype
+        S.NativeBrand = NativeBrand.StringWrapper;
+        S.Extensible = true;
+        S.DefineOwnProperty('length', {
+            Value: str.length,
+            Writable: false,
+            Enumerable: false,
+            Configurable: false
+        }, false);
+        S.PrimitiveValue = str;
+        return S;
+    }
+
+    JSString.prototype = Object.create(JSObject.prototype, {
+        super: JSObject
+    });
+
+    // 15.5.5.2
+    JSString.prototype.GetOwnProperty = function GetOwnProperty(P) {
+        var desc, val, str, index, len, resultStr;
+        desc = JSObject.prototype.GetOwnProperty.call(this, P);
+        if (desc !== undefined) {
+            return desc;
+        }
+        val = ToInteger(P);
+        // FIXME inserted
+        $ReturnIfAbrupt(val);
+        val = Math.abs(val);
+        val = ToString(val);
+        // FIXME inserted
+        $ReturnIfAbrupt(val);
+        if (val !== P) {
+            return undefined;
+        }
+        str = this.PrimitiveValue;
+        index = ToInteger(P);
+        // FIXME inserted
+        $ReturnIfAbrupt(index);
+        len = str.length;
+        if (len <= index) {
+            return undefined;
+        }
+        resultStr = str[index];
+        return {
+            Value: resultStr,
+            Enumerable: true,
+            Writable: false,
+            Configurable: false
+        };
+    };
+
+    function JSBoolean() {
+        this.super.call(this);
+    }
+
+    // FIXME BooleanCreate is needed
+    function BooleanCreate(bool) {
+        var B = new JSBoolean();
+        B.Prototype = BooleanPrototype;  // TODO(Constellation) fix global BooleanPrototype
+        B.NativeBrand = NativeBrand.BooleanWrapper;
+        B.Extensible = true;
+        B.PrimitiveValue = bool;
+        return B;
+    }
+
+    JSBoolean.prototype = Object.create(JSObject.prototype, {
+        super: JSObject
+    });
+
+    function JSNumber() {
+        this.super.call(this);
+    }
+
+    // FIXME NumberCreate is needed
+    function NumberCreate(num) {
+        var N = new JSNumber();
+        N.Prototype = NumberPrototype;  // TODO(Constellation) fix global NumberPrototype
+        N.NativeBrand = NativeBrand.NumberWrapper;
+        N.Extensible = true;
+        N.PrimitiveValue = num;
+        return N;
+    }
+
+    JSNumber.prototype = Object.create(JSObject.prototype, {
+        super: JSObject
+    });
+
+    // Freezing prototypes
+    Object.freeze(JSObject.prototype);
+    Object.freeze(JSFunction.prototype);
+    Object.freeze(JSArray.prototype);
+    Object.freeze(JSString.prototype);
+    Object.freeze(JSBoolean.prototype);
+    Object.freeze(JSNumber.prototype);
+    Object.freeze(Realm.prototype);
+
+    exports.runtime = {
+        Object: JSObject,
+        Function: JSFunction,
+        Array: JSArray,
+        String: JSString,
+        Boolean: JSBoolean,
+        Number: JSNumber
+    };
     exports.Realm = Realm;
 }(typeof exports === 'undefined' ? (shibuya = {}) : exports));
 /* vim: set sw=4 ts=4 et tw=80 : */
