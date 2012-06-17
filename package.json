@@ -2,9 +2,9 @@
     "name": "shibuya",
     "description": "ECMA262 6th draft engine",
     "homepage": "http://github.com/Constellation/shibuya.html",
-    "main": "shibuya.js",
+    "main": "./lib/shibuya.js",
     "bin": {
-        "shibuya": "./bin/shibuya.js"
+        "shibuya": "./bin/shibuya"
     },
     "version": "0.0.4-dev",
     "engines": {
