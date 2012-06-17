@@ -1251,7 +1251,7 @@
     JSObject.prototype.GetProperty = function GetProperty(P) {
         var prop, proto;
         prop = this.GetOwnProperty(P);
-        if (prop === undefined) {
+        if (prop !== undefined) {
             return prop;
         }
         proto = this.Prototype;
