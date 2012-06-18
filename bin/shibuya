@@ -46,15 +46,26 @@
     }
 
     realm = new shibuya.runtime.Realm();
-    for (i = 0, len = files.length; i < len; ++i) {
-        file = files[i];
-        content = fs.readFileSync(file, 'utf-8'),
-        code = shibuya.compiler.compile(content);
-        ret = realm.run(code);
-        if (shibuya.runtime.isAbruptCompletion(ret)) {
-            console.error(ret.value);
-            process.exit(2);
+    realm.with(function () {
+        var print = shibuya.runtime.NativeFunctionCreate('print', 1, function (args) {
+            console.log.apply(console, args);
+        });
+        this.this.DefineOwnProperty('print', {
+            Value: print,
+            Writable: false,
+            Configurable: false,
+            Enumerable: false
+        }, false);
+        for (i = 0, len = files.length; i < len; ++i) {
+            file = files[i];
+            content = fs.readFileSync(file, 'utf-8'),
+            code = shibuya.compiler.compile(content);
+            ret = realm.run(code);
+            if (shibuya.runtime.isAbruptCompletion(ret)) {
+                console.error(ret.value);
+                process.exit(2);
+            }
         }
-    }
+    });
 }());
 /* vim: set ft=javascript sw=4 ts=4 et tw=80 : */
