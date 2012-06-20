@@ -30,14 +30,7 @@
 
     var fs = require('fs'),
         shibuya = require('shibuya'),
-        files = process.argv.splice(2),
-        realm,
-        i,
-        len,
-        code,
-        ret,
-        content,
-        file;
+        files = process.argv.splice(2);
 
     if (!files.length) {
         console.log('usage');
@@ -45,22 +38,25 @@
         process.exit(1);
     }
 
-    realm = new shibuya.runtime.Realm();
-    realm.with(function () {
-        var print = shibuya.runtime.NativeFunctionCreate('print', 1, function (args) {
+    new shibuya.runtime.Realm().with(function () {
+        var code, print, i, len, file, content, ret;
+
+        print = shibuya.runtime.NativeFunctionCreate('print', 1, function (args) {
             console.log.apply(console, args);
         });
+
         this.this.DefineOwnProperty('print', {
             Value: print,
             Writable: false,
             Configurable: false,
             Enumerable: false
         }, false);
+
         for (i = 0, len = files.length; i < len; ++i) {
             file = files[i];
             content = fs.readFileSync(file, 'utf-8'),
             code = shibuya.compiler.compile(content);
-            ret = realm.run(code);
+            ret = this.run(code);
             if (shibuya.runtime.isAbruptCompletion(ret)) {
                 console.error(ret.value);
                 process.exit(2);
