@@ -7,12 +7,13 @@ The ECMAScript Metoropolis
 ## Abstract
 
 Shibuya is ES.next implementation written in ES5.1.
-Currently, this works on Node.js.
 
 ## What's Shibuya?
 
 [Shibuya](http://en.wikipedia.org/wiki/Shibuya,\_Tokyo) is a ward of Tokyo.
-And this engine is originated from Japanese JavaScript user group, [Shibuya.js](http://shibuyajs.org/) in this place.
+
+And this engine is originated from Japanese JavaScript developers group, [Shibuya.js](http://shibuyajs.org/) in this place.
+
 We love ECMAScript and implementations.
 
 ## Getting started
@@ -29,23 +30,22 @@ if file is not provided, Shibuya starts with interactive shell mode.
 
 ## Status
 
-Shibuya is tested by test262 ES5 conformance suite, and Shibuya's ES.next conformance suite.
-Currently, Shibuya has already sufficed for ES5 engine.
+Shibuya will be tested by test262 ES5 conformance suite, and Shibuya's ES.next conformance suite.
 
 ## Internals
 
-In shibuya, we use esprima harmony branch as a parser, and implement Shibuya as a simple AST Interpreter.
+In shibuya, we use esprima harmony branch as a parser, and implement Shibuya as a simple Stack VM because we should implement YieldExpression system.
 
 Runtime is also implemented by ES5.1. See source code for more details.
 
 ## Goals
 
 Implementing ES.next precisely and being reference implementation of ES.next are goals.
-This is implemented in ES5.1 because of readability of ECMAScript developers.
-So this implementation is not targetting fast speed.
+This is written in ES5.1 because of readability of ECMAScript developers.
+So this implementation isn't targetting fast speed.
 
-Basically, this project started as a sub-project of [iv / lv5](https://github.com/Constellation/iv) ECMAScript engine project written in C++,
-some code is based on that implementation.
+Basically, this project started as a sub-project of [iv / lv5](https://github.com/Constellation/iv) ECMAScript engine project written in C++.
+Some code is based on that implementation.
 
 ## Developers and Contributors
 
