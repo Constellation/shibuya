@@ -32,7 +32,7 @@ var content = fs.readFileSync(filename, 'utf-8');
 content = content.split('\n').map(function(line) {
     return line
     .replace(/^(\s*)\$ReturnIfAbrupt\(([^)]+)\);/g, '$1// expanded ReturnIfAbrupt by preprocess.js\n$1if (isAbruptCompletion($2)) { return $2; } else if ($2 instanceof Completion) { $2 = $2.value; }')
-    .replace(/^(\s*)\$BreakIfAbrupt\(([^)]+)\);/g, '$1// expanded BreakIfAbrupt by preprocess.js\n$1if (isAbruptCompletion($2)) {\n$1    err = $2.value;\n$1    break;\n$1} else if ($2 instanceof Completion) {\n$1    $2 = $2.value;\n$1}');
+    .replace(/^(\s*)\$BreakIfAbrupt\(([^)]+)\);/g, '$1// expanded BreakIfAbrupt by preprocess.js\n$1if (isAbruptCompletion($2)) {\n$1    err = $2.value;\n$1    break DISPATCH;\n$1} else if ($2 instanceof Completion) {\n$1    $2 = $2.value;\n$1}');
 }).join('\n');
 
 fs.writeFileSync(filename, content, 'utf-8');
