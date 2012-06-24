@@ -39,14 +39,14 @@
     }
 
     new shibuya.runtime.Realm().with(function () {
-        var code, print, i, len, file, content, ret;
+        var code, inspect, i, len, file, content, ret;
 
-        print = shibuya.runtime.NativeFunctionCreate('print', 1, function (args) {
+        inspect = shibuya.runtime.NativeFunctionCreate('inspect', 1, function (args) {
             console.log.apply(console, args);
         });
 
-        this.this.DefineOwnProperty('print', {
-            Value: print,
+        this.this.DefineOwnProperty('inspect', {
+            Value: inspect,
             Writable: false,
             Configurable: false,
             Enumerable: false
